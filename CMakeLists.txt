@@ -16,3 +16,7 @@ include_directories(${CMAKE_SOURCE_DIR}/eigen/3.3.4/include/eigen3)
 add_executable(calc_vector
     main_calc_vector.cpp
 )
+
+add_executable(calc_matrix
+    main_calc_matrix.cpp
+)

@@ -20,3 +20,7 @@ add_executable(calc_vector
 add_executable(calc_matrix
     main_calc_matrix.cpp
 )
+
+add_executable(matrix_features
+    main_matrix_features.cpp
+)

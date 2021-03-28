@@ -158,4 +158,69 @@ int main(int,char**)
         std::cout << "M1 = \n" << M1 << std::endl;
         std::cout << "M2 = \n" << M2 << std::endl;
     }
+
+    // ベクトルと行列の演算
+    {
+        Vector3d c1, c2, c3;
+        RowVector3d r1, r2, r3; // 行ベクトル
+        Matrix3d M1, M2;
+        double s;
+
+        c1 = Vector3d::Random();
+        r1 = RowVector3d::Random();
+        M1 = Matrix3d::Random();
+
+        std::cout << "c1 = \n" << c1.transpose() << std::endl;
+        std::cout << "r1 = \n" << r1 << std::endl;
+        std::cout << "M1 = \n" << M1 << std::endl;
+
+        // 行列 x 列ベクトル
+        c2 = M1 * c1;
+        // 次式は計算出来ないので、コンパイル時にエラー
+        // c2 = c1 * M1;
+
+        // 行ベクトル x 行列
+        r2 = r1 * M1;
+        // 次式は計算できないので、コンパイル時にエラー
+        // r2 = M1 * r1;
+
+        std::cout << "M1 * c1 = \n" << c2.transpose() << std::endl;
+        std::cout << "r1 * M1 = \n" << r2 << std::endl;
+
+        r3 = r1; c3 = c1;
+        // 以下の代入演算子による行ベクトル x 行列 の演算は可能
+        r3 *= M1;
+        // 以下の代入演算子による列ベクトル x 行列 の演算は不可能
+        // c3 *= M1;
+
+        std::cout << "r1 * M1 = \n" << r3 << std::endl;
+
+        
+        // 行ベクトルと列ベクトルの変換
+        c3 = r1.transpose(); // 列ベクトル
+        r3 = c1.transpose(); // 行ベクトル
+
+        // 列ベクトルと行ベクトルの積=行列
+        M2 = c3 * r3;
+        std::cout << "c3 * r3 = \n" << M2 << std::endl;
+
+        // 行ベクトルと列ベクトルの積＝内積
+        s = r3 * c3;
+        std::cout << "r3 * c3 = " << s << std::endl;
+
+        // 行列の列や行の取り出し
+        Vector3d mc0, mc1, mc2;
+        RowVector3d mr0, mr1, mr2;
+
+        mc0 = M1.col(0); mc1 = M1.col(1); mc2 = M1.col(2); // 列の取り出し
+        mr0 = M1.row(0); mr1 = M1.row(1); mr2 = M1.row(2); // 行の取り出し
+
+        std::cout << "Matrix M1 = \n" << M1 << std::endl;
+        std::cout << "M1.col(0) = \n" << mc0 << std::endl;
+        std::cout << "M1.col(1) = \n" << mc1 << std::endl;
+        std::cout << "M1.col(2) = \n" << mc2 << std::endl;
+        std::cout << "M1.row(0) = " << mr0 << std::endl;
+        std::cout << "M1.row(1) = " << mr1 << std::endl;
+        std::cout << "M1.row(2) = " << mr2 << std::endl;
+    }
 }

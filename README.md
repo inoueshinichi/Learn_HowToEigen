@@ -17,14 +17,14 @@ https://eigen.tuxfamily.org/index.php?title=Main_Page
 [m31, m32, m33]
 ```
 と行列があるとき, メモリ配列として2パターンある  
-1. [行優先] m11, m12, m13, m21, m22, m23, m31, m32, m33
-2. [列優先] m11, m21, m31, m12, m22, m32, m13, m23, m33
+1. [行優先] `m11, m12, m13, m21, m22, m23, m31, m32, m33`
+2. [列優先] `m11, m21, m31, m12, m22, m32, m13, m23, m33`  
 行優先データ・・・C/C++, DirectX, OpenCV, numpy  
 列優先データ・・・Fortran, Matrab(デフォルト), R, Eigen(デフォルト), OpenGL  
 
 主にデータのコピー時に問題になる. EigenではRowMajor, ColMajorで指定できる.  
-行優先データ -> Matrix3i<int, 3, 3, Eigen::RowMajor>  
-列優先データ -> Matrix3i<int, 3, 3, Eigen::ColMajor> (デフォルト)  
+行優先データ -> `Matrix3i<int, 3, 3, Eigen::RowMajor>`  
+列優先データ -> `Matrix3i<int, 3, 3, Eigen::ColMajor>` (デフォルト)  
 
 
 ## 計算表記の行優先と列優先  

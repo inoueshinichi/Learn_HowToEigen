@@ -72,21 +72,13 @@ message(STATUS "========== [END] C++ All Target Options ==========")
 include_directories(${CMAKE_SOURCE_DIR}) # test_utils.hpp
 
 add_subdirectory(BasicOperation)
-# add_subdirectory()
+add_subdirectory(LinAlg)
 # add_subdirectory()
 # add_subdirectory()
 # add_subdirectory()
 # add_subdirectory()
 # add_subdirectory()
 
-
-add_executable(calc_vector
-    main_calc_vector.cpp
-)
-
-add_executable(calc_matrix
-    main_calc_matrix.cpp
-)
 
 add_executable(matrix_features
     main_matrix_features.cpp

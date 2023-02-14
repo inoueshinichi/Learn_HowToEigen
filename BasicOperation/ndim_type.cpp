@@ -88,6 +88,10 @@ int main(int, char **)
          */
         using RowMajorMatrix3i = Eigen::Matrix<int, 3, 3, Eigen::RowMajor>;
         using ColMajorMatrix3i = Eigen::Matrix<int, 3, 3, Eigen::ColMajor>;
+        using RowMajorVector3i = Eigen::Matrix<int, 1, 3, Eigen::RowMajor>;
+        using ColMajorVector3i = Eigen::Matrix<int, 3, 1, Eigen::ColMajor>;
+
+        
 
         /**
          * @brief 計算表記の行優先と列優先

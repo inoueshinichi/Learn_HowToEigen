@@ -73,13 +73,13 @@ include_directories(${CMAKE_SOURCE_DIR}) # test_utils.hpp
 
 add_subdirectory(BasicOperation)
 add_subdirectory(LinAlg)
-# add_subdirectory()
+add_subdirectory(Mapping)
 # add_subdirectory()
 # add_subdirectory()
 # add_subdirectory()
 # add_subdirectory()
 
 
-add_executable(matrix_features
-    main_matrix_features.cpp
-)
+# add_executable(matrix_features
+#     main_matrix_features.cpp
+# )

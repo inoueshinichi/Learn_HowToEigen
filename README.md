@@ -1,7 +1,7 @@
 # How to Eigen  
 https://eigen.tuxfamily.org/index.php?title=Main_Page  
 
-## データ順序と表記順序による効率  
+## データ順序と表記順序の組合せ  
 | データ順序 | 表記順序 | イメージの容易さ | プログラム記述 | モジュール例 |
 | :-- | :-- | :-- | :-- | :-- |
 | 列優先 | 列優先 | ◯ | × | Matlab(デフォルト), R, OpenGL |

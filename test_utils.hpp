@@ -19,6 +19,7 @@
 #include <random>
 
 #include <vector>
+#include <array>
 
 #include <cstring>
 #include <memory>

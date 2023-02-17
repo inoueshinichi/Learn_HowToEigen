@@ -24,6 +24,9 @@
 #include <cstring>
 #include <memory>
 
+#include <chrono>
+using namespace std::chrono;
+
 #if _MSC_VER
 #define _USE_MATH_DEFINES
 #endif

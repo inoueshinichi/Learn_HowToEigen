@@ -10,3 +10,4 @@ make_test_case_eigen(EIGEN_LINALG_GENERAL_EIGEN_PROBLEM ./general_eigen_problem.
 make_test_case_eigen(EIGEN_LINALG_DECOMP_SVD ./Decomp/svd_decomp.cpp)
 make_test_case_eigen(EIGEN_LINALG_DECOMP_LU ./Decomp/lu_decomp.cpp)
 make_test_case_eigen(EIGEN_LINALG_DECOMP_CHOLESKY ./Decomp/cholesky_decomp.cpp)
+make_test_case_eigen(EIGEN_LINALG_DECOMP_QR ./Decomp/qr_decomp.cpp)

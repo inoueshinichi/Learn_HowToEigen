@@ -9,3 +9,4 @@ make_test_case_eigen(EIGEN_LINALG_GENERAL_EIGEN_PROBLEM ./general_eigen_problem.
 # Decomp directory
 make_test_case_eigen(EIGEN_LINALG_DECOMP_SVD ./Decomp/svd_decomp.cpp)
 make_test_case_eigen(EIGEN_LINALG_DECOMP_LU ./Decomp/lu_decomp.cpp)
+make_test_case_eigen(EIGEN_LINALG_DECOMP_CHOLESKY ./Decomp/cholesky_decomp.cpp)

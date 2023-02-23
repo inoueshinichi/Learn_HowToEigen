@@ -12,7 +12,7 @@
 #include <test_utils.hpp>
 
 /**
- * @brief ベクトルの
+ * @brief Eigenのベクトル・行列へのマッピング用クラス
  *
  */
 template <typename T>

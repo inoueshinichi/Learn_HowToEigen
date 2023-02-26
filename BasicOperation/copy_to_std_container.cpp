@@ -139,9 +139,6 @@ int main(int, char**)
 
         std::cout << "-------------------------" << std::endl;
 
-        // Eigenの動的行列変数をstd::vector<std::vector>>にコピー
-        {
-        }
     }
     catch(const std::exception& e)
     {

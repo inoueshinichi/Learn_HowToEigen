@@ -11,18 +11,23 @@
 #include <test_utils.hpp>
 
 /**
- * @brief 一般逆行列の求め方.
- * @note Eigenの各行列分解クラスのsolverを使う.
- * 1. 行列Mが実対称正方行列(nxn)で特異行列のとき(rank(M) = r < n) -> SelfAdjointEigenSolverクラス, FullPivHouseholderQRクラスを使う
- * 2. 行列Mが実正方行列(nxn)で特異行列のとき -> 実際は(mxn)の非正方行列と同じなので, BDCSVDクラス(推奨) or JacobiSVDクラス(行列サイズ10未満)を使う
- * 3. 行列Mが実対称複素正方行列(nxn)で特異行列のとき -> SelfAdjointEigenSolverクラスを使う
- * 4. 行列Mが複素正方行列(nxn)で特異行列のとき -> ComplexEigenSolver, SVD系
- * 5. 行列Mが非正方行列(mxn)(特異行列) rank(M) = r < min(m,r) のとき -> BDCSVDクラス(推奨) or JacobiSVDクラス(行列サイズ10未満)を使う
- * 
- * その他, 行列Mが元々正則の場合
- * 6. 行列Mが実正方行列(nxn) -> EigenSolver, LU系, QR系, SVD系 だいたいなんでも
- * 7. 行列Mが複素正方行列(nxn) -> ComplexEigenValue
- * 8. 行列Mが自己随伴行列(nxn) -> SelfAdjointEigenSolver
+ * @brief 一般逆行列の求め方. 行列M(mxn)
+ * @note 直接一般逆行列を求めるようなことはせず, [1]連立1次方程式の解から求める or [2]SVDから直接式を求める.
+ * @note 行列M(mxn)がフルランク以外はSVD系を使っとけば安心. ただし, JacobiSVDは, 行列サイズが10未満で使用すること.
+ * @note 行列M(mxn)の条件がわからない環境では, 実質的にBDCSVD一択.
+ * 1. フルランク(正則行列) rank(M) = m = n
+ * 1-1. 実行列 -> EVD系, LU系, QR系, SVD系. 推奨はPartialPivLU.
+ * 1-2. 複素行列 -> QR系, [EVD系, SVD系]
+ * 1-3. 実対称行列or自己随伴行列 -> SelfAdjointEigenSolver, [LU系, QR系, EVD系, SVD系]
+ *
+ * 2. 優決定系(列方向に関して正則) rank(M) = n
+ * 2-1. 実行列 -> EVD系, QR系, SVD系.  推奨はColPivHouseholderQR or SVD系
+ * 2-2. 複素行列 -> EVD系, QR系, SVD系. 推奨はColPivHouseholderQR or SVD系
+ *
+ * 3. 劣決定系 rank(M) = m
+ * 3-1. 実行列 -> EVD系, SVD系. 推奨はSVD系
+ * 3-2. 複素行列 -> EVD系, SVD系. 推奨はSVD系
+ * 3-3. 実対称行列or自己随伴行列 -> SelfAdjointEigenSolver, EVD系, SVD系. 推奨はSelfAdjointEigenSolver
  */
 
 namespace Eigen
@@ -31,17 +36,19 @@ namespace Eigen
     typedef Eigen::Matrix<double, 6, 6> Matrix6d;
 }
 
-#define STR(name) #name
+
 
 template <typename MAT>
 void CheckRank(const MAT& mat)
 {
+#define STR(name) #name
     std::cout << "Mat size (" << mat.rows() << "," << mat.cols() << ")" << std::endl;
     std::cout << "[Check] Matrix rank" << std::endl;
     Eigen::FullPivLU<MAT> FPLU(mat);
     std::cout << "Rank of " << STR(MAT) << ": " << FPLU.rank() << std::endl;
     std::cout << "IsInvertable? -> " << std::boolalpha << FPLU.isInvertible();
     std::cout << std::noboolalpha << std::endl;
+#undef STR
 }
 
 
@@ -49,15 +56,15 @@ void CheckRank(const MAT& mat)
 Eigen::Matrix6d M_1;   // 対象の行列 M_1 = UΣU^{T}で表せるとき
 Eigen::Matrix6d M_1_i; // 一般逆行列 M_1_i = UΣ^{-1}U^{T}
 
-// 2. ランク落ちの実正方行列(4x4, rank=)
-Eigen::Matrix4d M_2;   // 対称の行列
-Eigen::Matrix4d M_2_i; // 一般逆行列
+// 2. ランク落ちの実正方行列(3x3, m=3,n=3 rank=r=n < m)
+Eigen::Matrix3d M_2;   // 対称の行列
+Eigen::Matrix3d M_2_i; // 一般逆行列
 
 int main(int, char**)
 {
     try
     {
-        // 1. 行列Mが実対称正方行列(nxn)のとき(rank(M) = r < n)
+        // 1. 行列Mが実対称正方行列(nxn)のとき(rank(M) = r < n) (ランク落ち)
        {
             // ランク 5 の対称行列作成
             Eigen::Matrix6d T, T2;
@@ -114,7 +121,7 @@ int main(int, char**)
         //     // EigenはC言語の標準ライブラリのsrand()関数をランダムジェネレータに使用している.
         //     //#include <stdlib.h>
         //     srand(100);
-        //     M_2 << 1,2,2,2,3,4,-1,1,-2,3,0,6;
+        //     M_2 << 1, 2, 2, 0, 1, 1, 0, 0, 0;
         //     std::cout << "M_2 = \n" << M_2 << std::endl;
         //     CheckRank(M_2);
 
@@ -154,7 +161,7 @@ int main(int, char**)
         // // 2. 行列Mがランク落ち実正方行列(nxn)のとき
         // {
         //     // ランク落ち実正方行列
-        //     M_2 << 1, 2, 2, 2, 3, 4, -1, 1, -2, 3, 0, 6;
+        //     M_2 << 1, 2, 2, 0, 1, 1, 0, 0, 0;
         //     std::cout << "M_2 = \n"
         //               << M_2 << std::endl;
         //     CheckRank(M_2);
@@ -184,14 +191,14 @@ int main(int, char**)
         // 2. 行列Mがランク落ち実正方行列(nxn)のとき
         {
             // ランク落ち実正方行列
-            M_2 << 1, 2, 2, 2, 3, 4, -1, 1, -2, 3, 0, 6;
+            M_2 << 1, 2, 2, 0, 1, 1, 0, 0, 0;
             std::cout << "M_2 = \n"
                       << M_2 << std::endl;
             CheckRank(M_2);
 
             auto tp_start = high_resolution_clock::now();
 
-            Eigen::BDCSVD<Eigen::Matrix4d> BDC_SVD(M_2, Eigen::ComputeFullU | Eigen::ComputeFullV); // 固有値ベクトルの計算ON
+            Eigen::BDCSVD<Eigen::Matrix3d> BDC_SVD(M_2, Eigen::ComputeThinU | Eigen::ComputeThinV); // 固有値ベクトルの計算ON
 
             auto tp_end = high_resolution_clock::now();
             auto duration = tp_end - tp_start;
@@ -212,14 +219,14 @@ int main(int, char**)
             /**
              * @brief 一般逆行列
              * SVDで M_2 = U * Σ * V^{-1} と計算されるので,
-             * M_2_i = V * Σ^{-1} * U で計算できる.
+             * M_2_i = V * Σ^{-1} * U^{-1} で計算できる.
              */
-            M_2_i = BDC_SVD.matrixV() * BDC_SVD.singularValues().asDiagonal().inverse() * BDC_SVD.matrixU();
+            M_2_i = BDC_SVD.matrixV() * BDC_SVD.singularValues().asDiagonal().inverse() * BDC_SVD.matrixU().transpose();
 
             // 同じ計算
             // Eigen::VectorXd s = BDC_SVD.singularValues();
             // s = s.array().inverse();
-            // M_2_i = BDC_SVD.matrixV() * s.asDiagonal() * BDC_SVD.matrixU();
+            // M_2_i = BDC_SVD.matrixV() * s.asDiagonal() * BDC_SVD.matrixU().transpose();
 
             std::cout << "M_2_i = \n" << M_2_i << std::endl;
         }

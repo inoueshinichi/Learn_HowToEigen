@@ -16,8 +16,10 @@
  * @brief 連立方程式Ax=bの解法一覧 M(mxn)
  * 1. 決定系: Aがフルランク, rank(M)=m=n  -> ガウスの消去法(LU系◎, Cholesky系), 完全直交化(CompleteOrthgonalDecomposition), 最小二乗法(QR系, SVD系).
  * 2. 優決定系: Aが列フルランク. rank(M)=n -> ガウスの消去法(FullPivLU), 最小二乗法(QR系, SVD系), COD(CompleteOrthgonalDecomposition).
- * 3. 劣決定系: Aが行フルランク. rank(M)=m -> L2ノルム正則によるラグランジュ未定乗数法で任意の解から1つ選ぶ. -> 帰着: 最小二乗法法 -> SVD系
+ * 3. 劣決定系: Aが行フルランク. rank(M)=m -> L2ノルム正則を目的関数, s.tをAx=bとしたラグランジュ未定乗数法で任意の解から1つ選ぶ. -> 帰着: 最小二乗法法 -> QR系, SVD系
  * 4. ランク落ち: rank(A)=r<min(m,n)     -> 1,2,3のどれかに帰着するのでSVD系.
+ * 
+ * @note 優決定or劣決定の行か列の一方がフルランクの場合QR系が使えそう. もちろん, SVD系も使える
  */
 
 namespace Eigen
@@ -387,14 +389,179 @@ int main(int, char**)
             }
         }
 
-        // 3. 劣決定系(Aが行フルランク. 行に関して正則. -> SVDによる最小二乗法
-        {
+        std::cout << "----- Let's solve Ax=b [Full Rank about row]-----" << std::endl;
 
+        // 3. 劣決定系 -> SVDによる最小二乗法
+        {
+            // 優決定の係数行列を転置
+            Eigen::Matrix3d M;
+            M << 1, 2, 2, 0, 1, 1, 0, 0, 0;
+            M.transposeInPlace();
+            std::cout << "M = \n"
+                      << M << std::endl;
+            CheckRank(M);
+
+            Eigen::Vector3d x, b;
+            x = Eigen::Vector3d::Zero();
+            b = Eigen::Vector3d::Random();
+            std::cout << "x = \n"
+                      << x << std::endl;
+            std::cout << "b = \n"
+                      << b << std::endl;
+
+            // 3-1. ColPivHouseholderQR [Fail]
+            {
+                std::cout << "[ColPivHouseHolder solver (Success)]" << std::endl;
+                Eigen::ColPivHouseholderQR<Eigen::Matrix3d> CPHQR(M);
+
+                auto tp_start = high_resolution_clock::now();
+
+                x = CPHQR.solve(b);
+
+                auto tp_end = high_resolution_clock::now();
+                auto duration = tp_end - tp_start;
+                double duration_ms = duration_cast<nanoseconds>(duration).count() / 1000.0;
+                std::cout << "Elapsed Time of ColPivHouseHolder " << duration_ms << "[ms]" << std::endl;
+
+                std::cout << "x = \n"
+                          << x << std::endl;
+            }
+
+            std::cout << "------------" << std::endl;
+
+            // 3-2. FullPivHouseholderQR [Fail]
+            {
+                std::cout << "[FullPivHouseHolder solver (Success)]" << std::endl;
+                Eigen::FullPivHouseholderQR<Eigen::Matrix3d> FPHQR(M);
+
+                auto tp_start = high_resolution_clock::now();
+
+                x = FPHQR.solve(b);
+
+                auto tp_end = high_resolution_clock::now();
+                auto duration = tp_end - tp_start;
+                double duration_ms = duration_cast<nanoseconds>(duration).count() / 1000.0;
+                std::cout << "Elapsed Time of ColPivHouseHolder " << duration_ms << "[ms]" << std::endl;
+
+                std::cout << "x = \n"
+                          << x << std::endl;
+            }
+
+            std::cout << "------------" << std::endl;
+
+            // 3-3. JacobiSVD [Success]
+            {
+                std::cout << "[JacobiSVD solver (Success)]" << std::endl;
+                Eigen::JacobiSVD JSVD(M, Eigen::ComputeThinU | Eigen::ComputeThinV); // Thinでいいので, UとVの計算を行わないとSolverは不定な値を出す
+
+                auto tp_start = high_resolution_clock::now();
+
+                x = JSVD.solve(b);
+
+                auto tp_end = high_resolution_clock::now();
+                auto duration = tp_end - tp_start;
+                double duration_ms = duration_cast<nanoseconds>(duration).count() / 1000.0;
+                std::cout << "Elapsed Time of JacobiSVD " << duration_ms << "[ms]" << std::endl;
+
+                std::cout << "x = \n"
+                          << x << std::endl;
+            }
+
+            std::cout << "------------" << std::endl;
+
+            // 3-4. BDSSVD [Success]
+            {
+                std::cout << "[BDCSVD solver (Success)]" << std::endl;
+                Eigen::BDCSVD BDCSVD(M, Eigen::ComputeThinU | Eigen::ComputeThinV); // Thinでいいので, UとVの計算を行わないとSolverは不定な値を出す
+
+                auto tp_start = high_resolution_clock::now();
+
+                x = BDCSVD.solve(b);
+
+                auto tp_end = high_resolution_clock::now();
+                auto duration = tp_end - tp_start;
+                double duration_ms = duration_cast<nanoseconds>(duration).count() / 1000.0;
+                std::cout << "Elapsed Time of BDCSVD " << duration_ms << "[ms]" << std::endl;
+
+                std::cout << "x = \n"
+                          << x << std::endl;
+            }
         }
 
         // 4. ランク落ち(rank(A) = r < min(m,n)) -> 1,2,3のどれかに帰着するので, SVD系でOK.
         {
+            Eigen::Matrix<double, 3, 4> M;
+            M << 3, 4, 6, 0, 
+                 0, 7, 8, 0,
+                 0, 0, 0, 0;
+            std::cout << "M = \n"
+                      << M << std::endl;
+            CheckRank(M);
 
+            Eigen::Vector4d x;
+            Eigen::Vector3d b;
+            x = Eigen::Vector4d::Zero();
+            b = Eigen::Vector3d::Random();
+            std::cout << "x = \n"
+                      << x << std::endl;
+            std::cout << "b = \n"
+                      << b << std::endl;
+
+            std::cout << "----- Let's solve Ax=b [Leak Rank about row and col]-----" << std::endl;
+
+            // 4-1. FullPivHouseholderQR [Fail]
+            {
+                std::cout << "[FullPivHouseHolder solver (Fail)]" << std::endl;
+                Eigen::FullPivHouseholderQR<Eigen::Matrix<double, 3, 4>> FPHQR(M);
+
+                auto tp_start = high_resolution_clock::now();
+
+                x = FPHQR.solve(b);
+
+                auto tp_end = high_resolution_clock::now();
+                auto duration = tp_end - tp_start;
+                double duration_ms = duration_cast<nanoseconds>(duration).count() / 1000.0;
+                std::cout << "Elapsed Time of ColPivHouseHolder " << duration_ms << "[ms]" << std::endl;
+
+                std::cout << "x = \n"
+                          << x << std::endl;
+            }
+
+            // 4-2. JacobiSVD [Success]
+            {
+                std::cout << "[JacobiSVD solver (Success)]" << std::endl;
+                Eigen::JacobiSVD JSVD(M, Eigen::ComputeThinU | Eigen::ComputeThinV); // Thinでいいので, UとVの計算を行わないとSolverは不定な値を出す
+
+                auto tp_start = high_resolution_clock::now();
+
+                x = JSVD.solve(b);
+
+                auto tp_end = high_resolution_clock::now();
+                auto duration = tp_end - tp_start;
+                double duration_ms = duration_cast<nanoseconds>(duration).count() / 1000.0;
+                std::cout << "Elapsed Time of JacobiSVD " << duration_ms << "[ms]" << std::endl;
+
+                std::cout << "x = \n"
+                          << x << std::endl;
+            }
+
+            // 4-3. BDSSVD [Success]
+            {
+                std::cout << "[BDCSVD solver (Success)]" << std::endl;
+                Eigen::BDCSVD BDCSVD(M, Eigen::ComputeThinU | Eigen::ComputeThinV); // Thinでいいので, UとVの計算を行わないとSolverは不定な値を出す
+
+                auto tp_start = high_resolution_clock::now();
+
+                x = BDCSVD.solve(b);
+
+                auto tp_end = high_resolution_clock::now();
+                auto duration = tp_end - tp_start;
+                double duration_ms = duration_cast<nanoseconds>(duration).count() / 1000.0;
+                std::cout << "Elapsed Time of BDCSVD " << duration_ms << "[ms]" << std::endl;
+
+                std::cout << "x = \n"
+                          << x << std::endl;
+            }
         }
     }
     catch(const std::exception& e)

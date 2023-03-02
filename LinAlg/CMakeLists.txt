@@ -21,5 +21,7 @@ make_test_case_eigen(EIGEN_LINALG_GENERAL_INVERSE_MATRIX ./general_inverse_matri
 # Solver
 make_test_case_eigen(EIGEN_LINALG_LINALG_SOLVER ./linalg_solver.cpp)
 
-# Least square
+# Relative Error
 make_test_case_eigen(EIGEN_LINALG_RELATIVE_ERROR ./linalg_relative_error.cpp)
+
+make_test_case_eigen(EIGEN_LINALG_LEAST_SQUARE ./linalg_least_square.cpp)

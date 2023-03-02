@@ -11,8 +11,11 @@
 #include <test_utils.hpp>
 
 /**
- * @brief 回転
+ * @brief 3次元変換(回転, スケール, 並進, アフィン)
  * 
+ * @tparam T 
+ * @param theta 
+ * @return T 
  */
 
 template <typename T>
@@ -95,8 +98,8 @@ int main(int, char**)
 
                 // Slerp
                 Eigen::Quaternionf slerped_q;
-                float ratio = 0.5f;
-                slerped_q = pq.slerp(ratio, q);
+                float ratio = 0.5f; // f = 0.5f
+                slerped_q = pq.slerp(ratio, q); // q * f + (1 - f) * pq
                 Eigen::Matrix3f slerped_rot;
                 slerped_rot = slerped_q.toRotationMatrix();
                 std::cout << "Rotation mat of slerped_q between q and pq = \n" << slerped_rot << std::endl;
@@ -142,22 +145,36 @@ int main(int, char**)
                 scale3d = scaling;
                 std::cout << "Scaling = \n" << scale3d.matrix() << std::endl;
 
-                // Transform
-                Eigen::Affine3f transform;
+                // Transform (EigenではVectorとPointの変数としての差異はない.)
+                Eigen::Affine3f transform; // (3+1,3+1) = (4,4)行列
                 transform = trans3d * rot3d * scale3d; // 列優先表現によるアフィン変換行列
-                std::cout << "trans3d * rot3d * scale3d = \n" << transform.matrix() << std::endl;
+                std::cout << "transform = trans3d * rot3d * scale3d = \n" << transform.matrix() << std::endl;
                 Eigen::Vector4f start_vec(1.0, 0.0, 0.0, 1.0); // 変換前ベクトル
                 Eigen::Vector4f end_vec; // 変換後ベクトル
                 end_vec = transform * start_vec;
                 std::cout << "start_vec = \n" << start_vec << std::endl;
                 std::cout << "end_vec = \n" << end_vec << std::endl;
 
+                // transform.linear()は回転行列+スケーリングの(3,3)部分だけを抜き出す
+                std::cout << "transform.linear() = \n"
+                          << transform.linear() << std::endl;
+
                 std::cout << "inverse(trans3d * rot3d * scale3d) = \n" << transform.matrix().inverse() << std::endl;
             }
 
-            std::cout << "[Let's check eular angle]" << std::endl;
-            {
+            
 
+            std::cout << "[OpenGL compability]" << std::endl;
+            {
+               // OpenGL compatibility 3D glLoadMatrixf(t.data());
+
+                /*
+                 OpenGL compatibility 2D
+                 Affine3f aux(Affine3f::Identity());
+                 aux.linear().topLeftCorner<2,2>() = t.linear();
+                 aux.translation().start<2>() = t.translation();
+                 glLoadMatrixf(aux.data());
+                */
             }
         }
 

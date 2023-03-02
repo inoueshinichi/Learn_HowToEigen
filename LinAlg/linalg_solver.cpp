@@ -527,6 +527,8 @@ int main(int, char**)
                           << x << std::endl;
             }
 
+            std::cout << "------------" << std::endl;
+
             // 4-2. JacobiSVD [Success]
             {
                 std::cout << "[JacobiSVD solver (Success)]" << std::endl;
@@ -544,6 +546,8 @@ int main(int, char**)
                 std::cout << "x = \n"
                           << x << std::endl;
             }
+
+            std::cout << "------------" << std::endl;
 
             // 4-3. BDSSVD [Success]
             {

@@ -74,7 +74,7 @@ include_directories(${CMAKE_SOURCE_DIR}) # test_utils.hpp
 add_subdirectory(BasicOperation)
 add_subdirectory(LinAlg)
 add_subdirectory(Mapping)
-# add_subdirectory()
+add_subdirectory(Geometry)
 # add_subdirectory()
 # add_subdirectory()
 # add_subdirectory()
